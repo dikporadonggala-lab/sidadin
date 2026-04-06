@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIDADIN - Sistem Data Kendaraan Dinas</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js untuk Grafik -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Animasi sederhana */
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .hidden-view { display: none !important; }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800 min-h-screen">
+
+    <!-- NAVBAR -->
+    <nav class="bg-blue-800 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <i data-lucide="car" class="h-8 w-8 mr-3 text-blue-300"></i>
+                    <span class="font-bold text-xl tracking-tight">SIDADIN</span>
+                    <span class="hidden sm:ml-2 sm:block text-sm text-blue-200 mt-1">Sistem Data Kendaraan Dinas</span>
+                </div>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <button onclick="navigateTo('form')" id="nav-btn-form" class="px-3 py-2 rounded-md text-sm font-medium bg-blue-900 text-white transition-colors hover:bg-blue-700">
+                        Form Pencocokan
+                    </button>
+                    
+                    <!-- Area tombol dinamis admin/login -->
+                    <div id="nav-admin-area" class="flex space-x-4">
+                        <button onclick="navigateTo('login')" id="nav-btn-login" class="flex items-center px-3 py-2 rounded-md text-sm font-medium text-blue-100 hover:bg-blue-700 transition-colors">
+                            <i data-lucide="lock" class="w-4 h-4 mr-2"></i> Login Dinas
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex items-center">
+                    <button onclick="toggleMobileMenu()" class="text-blue-200 hover:text-white p-2">
+                        <i data-lucide="menu" id="mobile-menu-icon" class="h-6 w-6"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-blue-800 border-t border-blue-700 px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            <button onclick="navigateTo('form')" id="mob-btn-form" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium bg-blue-900 text-white">
+                Form Pencocokan
+            </button>
+            <div id="mob-admin-area">
+                <button onclick="navigateTo('login')" id="mob-btn-login" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-blue-100 hover:bg-blue-700">
+                    Login Dinas
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- ============================================== -->
+        <!-- VIEW: FORM PENGISIAN -->
+        <!-- ============================================== -->
+        <div id="view-form" class="max-w-3xl mx-auto fade-in">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight mb-2">Pencocokan Data Kendaraan</h1>
+                <p class="text-gray-600">Masukkan nomor plat kendaraan untuk memverifikasi dan memperbarui data pemegang.</p>
+            </div>
+
+            <!-- Pesan Sukses -->
+            <div id="submit-success" class="hidden mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-4 rounded-lg flex items-start shadow-sm">
+                <i data-lucide="check-circle" class="w-6 h-6 mr-3 text-green-500 flex-shrink-0 mt-0.5"></i>
+                <div>
+                    <h3 class="font-bold">Data Berhasil Disimpan!</h3>
+                    <p class="text-sm mt-1">Terima kasih, data pembaruan kendaraan Anda telah masuk ke sistem kami.</p>
+                    <button onclick="resetForm()" class="mt-3 text-sm font-medium bg-green-600 text-white px-4 py-1.5 rounded hover:bg-green-700 transition-colors">
+                        Input Data Lain
+                    </button>
+                </div>
+            </div>
+
+            <!-- Area Form Utama -->
+            <div id="main-form-area" class="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100">
+                <!-- Search Section -->
+                <div class="p-6 sm:p-8 bg-blue-50/50 border-b border-gray-100">
+                    <form id="search-form" onsubmit="handleSearch(event)">
+                        <label for="plat" class="block text-sm font-semibold text-gray-700 mb-2">Nomor Plat Kendaraan</label>
+                        <div class="flex space-x-3">
+                            <div class="relative flex-grow">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i data-lucide="search" class="h-5 w-5 text-gray-400"></i>
+                                </div>
+                                <input type="text" id="input-plat" required class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 uppercase transition-shadow" placeholder="Contoh: AB 1234 CD">
+                            </div>
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-sm">
+                                Cari
+                            </button>
+                        </div>
+                        <p id="search-error" class="hidden mt-2 text-sm text-red-600 flex items-center">
+                            <i data-lucide="x" class="w-4 h-4 mr-1"></i> Data kendaraan tidak ditemukan. Periksa kembali nomor plat.
+                        </p>
+                    </form>
+                </div>
+
+                <!-- Found Vehicle Data Section -->
+                <div id="found-vehicle-section" class="hidden p-6 sm:p-8">
+                    <div class="flex items-center mb-6">
+                        <div class="bg-green-100 p-2 rounded-full mr-3">
+                            <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
+                        </div>
+                        <h2 class="text-xl font-bold text-gray-800">Data Ditemukan</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mb-8 bg-gray-50 p-6 rounded-xl border border-gray-200">
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Nama Kendaraan</p>
+                            <p class="font-medium text-gray-900 flex items-center"><i data-lucide="car" class="w-4 h-4 mr-2 text-gray-400"></i> <span id="v-kendaraan"></span></p>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Pemegang Lama</p>
+                            <p class="font-medium text-gray-900 flex items-center"><i data-lucide="user" class="w-4 h-4 mr-2 text-gray-400"></i> <span id="v-pemegang"></span></p>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">No. Rangka</p>
+                            <p id="v-rangka" class="font-mono text-sm font-medium text-gray-800 bg-white px-2 py-1 rounded border border-gray-200 inline-block"></p>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">No. Mesin</p>
+                            <p id="v-mesin" class="font-mono text-sm font-medium text-gray-800 bg-white px-2 py-1 rounded border border-gray-200 inline-block"></p>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">No. BPKB</p>
+                            <p id="v-bpkb" class="font-mono text-sm font-medium text-gray-800 bg-white px-2 py-1 rounded border border-gray-200 inline-block"></p>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Sekolah Terdaftar</p>
+                            <p class="font-medium text-gray-900 flex items-center"><i data-lucide="building" class="w-4 h-4 mr-2 text-gray-400"></i> <span id="v-sekolah"></span></p>
+                        </div>
+                        <div class="md:col-span-2">
+                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Alamat Terdaftar</p>
+                            <p class="font-medium text-gray-900 flex items-center"><i data-lucide="map-pin" class="w-4 h-4 mr-2 text-gray-400"></i> <span id="v-alamat"></span></p>
+                        </div>
+                    </div>
+
+                    <!-- Form Input Pembaruan -->
+                    <div class="border-t border-gray-200 pt-8 mt-2">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                            <i data-lucide="file-text" class="w-5 h-5 mr-2 text-blue-600"></i> Pembaruan Data Pemegang
+                        </h3>
+                        
+                        <form id="update-form" onsubmit="handleSubmitUpdate(event)" class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Pemegang Sekarang <span class="text-red-500">*</span></label>
+                                    <input required type="text" id="f-namaSekarang" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="Masukkan nama lengkap">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Instansi / Sekolah <span class="text-red-500">*</span></label>
+                                    <input required type="text" id="f-sekolahSekarang" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="Contoh: SDN 2 Bantul">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Kecamatan <span class="text-red-500">*</span></label>
+                                    <select required id="f-kecamatan" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white">
+                                        <option value="" disabled selected>Pilih Kecamatan</option>
+                                        <option value="Balaesang">Balaesang</option>
+                                        <option value="Balaesang Tanjung">Balaesang Tanjung</option>
+                                        <option value="Banawa">Banawa</option>
+                                        <option value="Banawa Selatan">Banawa Selatan</option>
+                                        <option value="Banawa Tengah">Banawa Tengah</option>
+                                        <option value="Dampelas">Dampelas</option>
+                                        <option value="Labuan">Labuan</option>
+                                        <option value="Pinembani">Pinembani</option>
+                                        <option value="Rio Pakava">Rio Pakava</option>
+                                        <option value="Sindue">Sindue</option>
+                                        <option value="Sindue Tobata">Sindue Tobata</option>
+                                        <option value="Sindue Tombusabora">Sindue Tombusabora</option>
+                                        <option value="Sirenja">Sirenja</option>
+                                        <option value="Sojol">Sojol</option>
+                                        <option value="Sojol Utara">Sojol Utara</option>
+                                        <option value="Tanantovea">Tanantovea</option>
+                                    </select>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Alamat Lengkap <span class="text-red-500">*</span></label>
+                                    <textarea required id="f-alamatSekarang" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none" placeholder="Masukkan alamat lengkap dengan RT/RW"></textarea>
+                                </div>
+
+                                <!-- File Uploads -->
+                                <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Unggah Foto STNK <span class="text-red-500">*</span></label>
+                                    <div class="flex items-center">
+                                        <label class="flex items-center justify-center px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer">
+                                            <i data-lucide="upload" class="w-4 h-4 mr-2"></i> Pilih Foto
+                                            <input required type="file" id="f-fotoStnk" accept="image/*" class="sr-only" onchange="updateFileName('f-fotoStnk', 'name-fotoStnk')">
+                                        </label>
+                                        <span id="name-fotoStnk" class="ml-3 text-sm text-gray-500 truncate max-w-xs">Belum ada file terpilih</span>
+                                    </div>
+                                </div>
+
+                                <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Unggah Foto Motor Tampak Depan <span class="text-red-500">*</span></label>
+                                    <div class="flex items-center">
+                                        <label class="flex items-center justify-center px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer">
+                                            <i data-lucide="upload" class="w-4 h-4 mr-2"></i> Pilih Foto
+                                            <input required type="file" id="f-fotoMotor" accept="image/*" class="sr-only" onchange="updateFileName('f-fotoMotor', 'name-fotoMotor')">
+                                        </label>
+                                        <span id="name-fotoMotor" class="ml-3 text-sm text-gray-500 truncate max-w-xs">Belum ada file terpilih</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pt-4">
+                                <button type="submit" id="btn-submit-form" class="w-full flex justify-center py-4 px-4 border border-transparent rounded-xl shadow-md text-lg font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors">
+                                    Simpan Data Pembaruan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- VIEW: LOGIN DINAS -->
+        <!-- ============================================== -->
+        <div id="view-login" class="hidden-view max-w-md mx-auto mt-12 fade-in">
+            <div class="bg-white py-8 px-6 shadow-xl rounded-2xl sm:px-10 border border-gray-100">
+                <div class="mb-8 text-center">
+                    <div class="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                        <i data-lucide="lock" class="w-8 h-8 text-blue-600"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900">Login Admin Dinas</h2>
+                    <p class="text-sm text-gray-500 mt-1">Gunakan akun admin untuk mengakses dashboard.</p>
+                </div>
+
+                <form onsubmit="handleLogin(event)" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Username</label>
+                        <div class="mt-1">
+                            <input required type="text" id="login-username" class="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Password</label>
+                        <div class="mt-1">
+                            <input required type="password" id="login-password" class="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                    </div>
+                    
+                    <p id="login-error" class="hidden text-sm text-red-600">Username atau password salah!</p>
+
+                    <div>
+                        <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Masuk Dashboard
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- VIEW: DASHBOARD ADMIN -->
+        <!-- ============================================== -->
+        <div id="view-dashboard" class="hidden-view fade-in">
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-8">
+                <div>
+                    <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight flex items-center">
+                        <i data-lucide="layout-dashboard" class="w-8 h-8 mr-3 text-blue-600"></i> Dashboard Verifikasi
+                    </h1>
+                    <p class="text-gray-600 mt-1">Pantau dan kelola pembaruan data kendaraan dinas.</p>
+                </div>
+                <div class="mt-4 md:mt-0 flex space-x-4">
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 min-w-[150px]">
+                        <p class="text-sm font-medium text-gray-500">Total Validasi</p>
+                        <p id="stat-validasi" class="text-3xl font-bold text-blue-600">0</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 min-w-[150px]">
+                        <p class="text-sm font-medium text-gray-500">Koneksi App Script</p>
+                        <p id="stat-kendaraan" class="text-lg font-bold text-green-600 mt-1">Aktif</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GRAFIK BATANG KECAMATAN -->
+            <div id="dashboard-chart-container" class="hidden bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100 mb-8 p-6">
+                <h3 class="text-lg leading-6 font-bold text-gray-900 mb-4">Statistik Pembaruan per Kecamatan</h3>
+                <div class="relative h-64 w-full">
+                    <canvas id="chartKecamatan"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100">
+                <div class="px-6 py-5 border-b border-gray-200 bg-gray-50">
+                    <h3 class="text-lg leading-6 font-bold text-gray-900">Data Pembaruan Terkini</h3>
+                </div>
+                
+                <div id="empty-dashboard" class="p-12 text-center text-gray-500">
+                    <i data-lucide="file-text" class="w-12 h-12 mx-auto mb-3 text-gray-300"></i>
+                    <p class="text-lg font-medium">Belum ada data pembaruan yang masuk.</p>
+                    <p class="text-sm mt-1">Data yang diisi melalui form pencocokan akan muncul di sini.</p>
+                </div>
+
+                <div id="table-dashboard" class="hidden overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Tanggal & Plat</th>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Kendaraan</th>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Pemegang Lama -> Baru</th>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Instansi Sekarang</th>
+                                <th scope="col" class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Berkas</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dashboard-tbody" class="bg-white divide-y divide-gray-200">
+                            <!-- Data baris akan diinject lewat JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- KODE JAVASCRIPT LOGIKA APLIKASI -->
+    <script>
+        // Inisialisasi Icons Lucide
+        lucide.createIcons();
+
+        // =================================================================
+        // PASTE URL WEB APP APPS SCRIPT ANDA DI SINI (Dalam tanda kutip)
+        // Contoh: 'https://script.google.com/macros/s/AKfycb.../exec'
+        // =================================================================
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzKAcbMcphegPP2CrTQuIbYCuKxP5kVb8FV_COUyVqSbSI2KKICJyMO2Me-HPVEbgPwOw/exec'; 
+
+        // --- DATA SIMULASI (Jika URL Script belum diatur) ---
+        const INITIAL_MASTER_DATA = [
+            { plat: "AB 1234 CD", kendaraan: "Honda Supra X 125", pemegangLama: "Budi Santoso", rangka: "MH1JB912345678", mesin: "JB91E-1234567", bpkb: "B-12345678", sekolah: "SDN 1 Bantul", alamat: "Jl. Jenderal Sudirman No. 1" },
+            { plat: "AB 5678 EF", kendaraan: "Yamaha Jupiter Z", pemegangLama: "Siti Rahmawati", rangka: "MH25TP12345678", mesin: "5TP-1234567", bpkb: "B-87654321", sekolah: "SMPN 2 Sleman", alamat: "Jl. Magelang Km 10" }
+        ];
+
+        let submittedData = [];
+        let currentFoundVehicle = null;
+        let isAdmin = false;
+        let mobileMenuOpen = false;
+        let chartInstance = null;
+
+        // --- NAVIGASI & TAMPILAN ---
+        function navigateTo(view) {
+            document.getElementById('view-form').classList.add('hidden-view');
+            document.getElementById('view-login').classList.add('hidden-view');
+            document.getElementById('view-dashboard').classList.add('hidden-view');
+
+            const formBtns = [document.getElementById('nav-btn-form'), document.getElementById('mob-btn-form')];
+            formBtns.forEach(btn => {
+                btn.classList.remove('bg-blue-900', 'text-white');
+                btn.classList.add('text-blue-100', 'hover:bg-blue-700');
+            });
+
+            if (view === 'form') {
+                document.getElementById('view-form').classList.remove('hidden-view');
+                formBtns.forEach(btn => {
+                    btn.classList.add('bg-blue-900', 'text-white');
+                    btn.classList.remove('text-blue-100', 'hover:bg-blue-700');
+                });
+            } else if (view === 'login') {
+                document.getElementById('view-login').classList.remove('hidden-view');
+            } else if (view === 'dashboard' && isAdmin) {
+                document.getElementById('view-dashboard').classList.remove('hidden-view');
+                renderDashboard();
+            }
+
+            if (mobileMenuOpen) toggleMobileMenu();
+        }
+
+        function toggleMobileMenu() {
+            mobileMenuOpen = !mobileMenuOpen;
+            const menu = document.getElementById('mobile-menu');
+            const icon = document.getElementById('mobile-menu-icon');
+            
+            if (mobileMenuOpen) {
+                menu.classList.remove('hidden');
+                icon.setAttribute('data-lucide', 'x');
+            } else {
+                menu.classList.add('hidden');
+                icon.setAttribute('data-lucide', 'menu');
+            }
+            lucide.createIcons();
+        }
+
+        function renderAdminButtons() {
+            const navAdminArea = document.getElementById('nav-admin-area');
+            const mobAdminArea = document.getElementById('mob-admin-area');
+            
+            if (isAdmin) {
+                navAdminArea.innerHTML = `
+                    <button onclick="navigateTo('dashboard')" class="px-3 py-2 rounded-md text-sm font-medium text-blue-100 hover:bg-blue-700 transition-colors">Dashboard</button>
+                    <button onclick="handleLogout()" class="flex items-center px-3 py-2 rounded-md text-sm font-medium text-red-200 hover:bg-red-800 hover:text-white transition-colors">
+                        <i data-lucide="log-out" class="w-4 h-4 mr-2"></i> Logout
+                    </button>
+                `;
+                mobAdminArea.innerHTML = `
+                    <button onclick="navigateTo('dashboard')" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-blue-100 hover:bg-blue-700">Dashboard</button>
+                    <button onclick="handleLogout()" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-200 hover:bg-red-800">Logout</button>
+                `;
+            } else {
+                navAdminArea.innerHTML = `
+                    <button onclick="navigateTo('login')" id="nav-btn-login" class="flex items-center px-3 py-2 rounded-md text-sm font-medium text-blue-100 hover:bg-blue-700 transition-colors">
+                        <i data-lucide="lock" class="w-4 h-4 mr-2"></i> Login Dinas
+                    </button>
+                `;
+                mobAdminArea.innerHTML = `
+                    <button onclick="navigateTo('login')" id="mob-btn-login" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-blue-100 hover:bg-blue-700">Login Dinas</button>
+                `;
+            }
+            lucide.createIcons();
+        }
+
+        // --- BANTUAN KONVERSI GAMBAR ---
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                if(!file) resolve(null);
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        // --- LOGIKA FORM PENCARIAN & UPDATE ---
+        async function handleSearch(e) {
+            e.preventDefault();
+            const query = document.getElementById('input-plat').value.replace(/\s+/g, '').toUpperCase();
+            if (!query) return;
+
+            const btn = e.target.querySelector('button[type="submit"]');
+            const errEl = document.getElementById('search-error');
+            const foundEl = document.getElementById('found-vehicle-section');
+            
+            btn.innerText = "Mencari...";
+            btn.disabled = true;
+
+            try {
+                let resultData = null;
+
+                if (SCRIPT_URL) {
+                    // Cari di Google Sheets API
+                    const response = await fetch(`${SCRIPT_URL}?action=search&plat=${encodeURIComponent(query)}`);
+                    const json = await response.json();
+                    if(json.status === 'success') resultData = json.data;
+                } else {
+                    // Fallback ke Simulasi jika Script URL kosong
+                    resultData = INITIAL_MASTER_DATA.find(v => v.plat.replace(/\s+/g, '').toUpperCase() === query);
+                }
+
+                if (resultData) {
+                    currentFoundVehicle = resultData;
+                    errEl.classList.add('hidden');
+                    foundEl.classList.remove('hidden');
+                    
+                    document.getElementById('v-kendaraan').innerText = resultData.kendaraan;
+                    document.getElementById('v-pemegang').innerText = resultData.pemegangLama;
+                    document.getElementById('v-rangka').innerText = resultData.rangka;
+                    document.getElementById('v-mesin').innerText = resultData.mesin;
+                    document.getElementById('v-bpkb').innerText = resultData.bpkb;
+                    document.getElementById('v-sekolah').innerText = resultData.sekolah;
+                    document.getElementById('v-alamat').innerText = resultData.alamat;
+
+                    document.getElementById('update-form').reset();
+                    document.getElementById('name-fotoStnk').innerText = "Belum ada file terpilih";
+                    document.getElementById('name-fotoMotor').innerText = "Belum ada file terpilih";
+                } else {
+                    currentFoundVehicle = null;
+                    errEl.classList.remove('hidden');
+                    foundEl.classList.add('hidden');
+                }
+            } catch (error) {
+                alert("Gagal terhubung ke database. Pastikan koneksi internet stabil atau SCRIPT_URL sudah benar.");
+                console.error(error);
+            } finally {
+                btn.innerText = "Cari";
+                btn.disabled = false;
+            }
+        }
+
+        function updateFileName(inputId, textId) {
+            const fileInput = document.getElementById(inputId);
+            const textEl = document.getElementById(textId);
+            if (fileInput.files.length > 0) {
+                textEl.innerText = fileInput.files[0].name;
+            } else {
+                textEl.innerText = "Belum ada file terpilih";
+            }
+        }
+
+        async function handleSubmitUpdate(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-submit-form');
+            btn.disabled = true;
+            btn.innerText = "Mengunggah Data & Foto...";
+            btn.classList.add('bg-blue-400', 'cursor-not-allowed');
+            btn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+
+            try {
+                const fileStnk = document.getElementById('f-fotoStnk').files[0];
+                const fileMotor = document.getElementById('f-fotoMotor').files[0];
+                
+                const base64Stnk = await fileToBase64(fileStnk);
+                const base64Motor = await fileToBase64(fileMotor);
+
+                const payload = {
+                    ...currentFoundVehicle,
+                    namaSekarang: document.getElementById('f-namaSekarang').value,
+                    sekolahSekarang: document.getElementById('f-sekolahSekarang').value,
+                    kecamatan: document.getElementById('f-kecamatan').value,
+                    alamatSekarang: document.getElementById('f-alamatSekarang').value,
+                    fotoStnkBase64: base64Stnk,
+                    fotoStnkMime: fileStnk ? fileStnk.type : "",
+                    fotoMotorBase64: base64Motor,
+                    fotoMotorMime: fileMotor ? fileMotor.type : ""
+                };
+
+                if (SCRIPT_URL) {
+                    // Simpan ke Google Sheets via POST
+                    await fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        body: JSON.stringify(payload)
+                    });
+                } else {
+                    // Fallback Simulasi
+                    await new Promise(r => setTimeout(r, 1000));
+                    payload.tanggal = new Date().toLocaleDateString('id-ID');
+                    payload.fotoStnk = base64Stnk;
+                    payload.fotoMotor = base64Motor;
+                    submittedData.unshift(payload);
+                }
+                
+                document.getElementById('found-vehicle-section').classList.add('hidden');
+                document.getElementById('main-form-area').classList.add('hidden');
+                document.getElementById('submit-success').classList.remove('hidden');
+                document.getElementById('input-plat').value = '';
+
+            } catch (error) {
+                alert("Terjadi kesalahan saat mengunggah data.");
+                console.error(error);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Simpan Data Pembaruan";
+                btn.classList.remove('bg-blue-400', 'cursor-not-allowed');
+                btn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('submit-success').classList.add('hidden');
+            document.getElementById('main-form-area').classList.remove('hidden');
+            document.getElementById('search-error').classList.add('hidden');
+            document.getElementById('found-vehicle-section').classList.add('hidden');
+        }
+
+        // --- LOGIKA LOGIN & DASHBOARD ---
+        function handleLogin(e) {
+            e.preventDefault();
+            const user = document.getElementById('login-username').value;
+            const pass = document.getElementById('login-password').value;
+            const errEl = document.getElementById('login-error');
+
+            if (user === 'admin' && pass === 'dinas123') {
+                isAdmin = true;
+                errEl.classList.add('hidden');
+                document.getElementById('login-username').value = '';
+                document.getElementById('login-password').value = '';
+                
+                renderAdminButtons();
+                navigateTo('dashboard');
+            } else {
+                errEl.classList.remove('hidden');
+            }
+        }
+
+        function handleLogout() {
+            isAdmin = false;
+            renderAdminButtons();
+            navigateTo('form');
+        }
+
+        async function renderDashboard() {
+            const emptyEl = document.getElementById('empty-dashboard');
+            const tableEl = document.getElementById('table-dashboard');
+            const tbody = document.getElementById('dashboard-tbody');
+            const chartContainer = document.getElementById('dashboard-chart-container');
+
+            if (SCRIPT_URL) {
+                emptyEl.innerHTML = "<p>Memuat data dari Google Sheets...</p>";
+                try {
+                    const response = await fetch(`${SCRIPT_URL}?action=getUpdates`);
+                    const json = await response.json();
+                    if(json.status === 'success') submittedData = json.data;
+                } catch(e) {
+                    console.error("Gagal load data dashboard", e);
+                }
+            }
+
+            document.getElementById('stat-validasi').innerText = submittedData.length;
+
+            if (submittedData.length === 0) {
+                emptyEl.classList.remove('hidden');
+                emptyEl.innerHTML = `
+                    <i data-lucide="file-text" class="w-12 h-12 mx-auto mb-3 text-gray-300"></i>
+                    <p class="text-lg font-medium">Belum ada data pembaruan yang masuk.</p>
+                `;
+                lucide.createIcons();
+                tableEl.classList.add('hidden');
+                chartContainer.classList.add('hidden');
+            } else {
+                emptyEl.classList.add('hidden');
+                tableEl.classList.remove('hidden');
+                chartContainer.classList.remove('hidden');
+                
+                // RENDER GRAFIK BATANG
+                const kecamatanCounts = {};
+                submittedData.forEach(data => {
+                    if(data.kecamatan) {
+                        kecamatanCounts[data.kecamatan] = (kecamatanCounts[data.kecamatan] || 0) + 1;
+                    }
+                });
+                
+                const ctx = document.getElementById('chartKecamatan').getContext('2d');
+                if(chartInstance) {
+                    chartInstance.destroy();
+                }
+                chartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(kecamatanCounts),
+                        datasets: [{
+                            label: 'Jumlah Kendaraan Diperbarui',
+                            data: Object.values(kecamatanCounts),
+                            backgroundColor: 'rgba(37, 99, 235, 0.8)',
+                            borderColor: 'rgba(29, 78, 216, 1)',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { stepSize: 1 }
+                            }
+                        }
+                    }
+                });
+
+                // RENDER TABEL
+                tbody.innerHTML = submittedData.map(data => `
+                    <tr class="hover:bg-blue-50 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-bold text-gray-900">${data.plat}</div>
+                            <div class="text-xs text-gray-500 mt-1">${data.tanggal}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm font-medium text-gray-900">${data.kendaraan}</div>
+                            <div class="text-xs text-gray-500 font-mono mt-1">Lama: ${data.pemegangLama}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm font-bold text-green-600 flex items-center">
+                                <span class="text-green-500 mr-1">↳</span> ${data.namaSekarang}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm font-medium text-gray-900">${data.sekolahSekarang}</div>
+                            <div class="text-xs text-gray-500 mt-1 truncate max-w-[200px]">${data.alamatSekarang}, Kec. ${data.kecamatan}</div>
+                        </td>
+                        <td class="px-6 py-4 text-center whitespace-nowrap">
+                            <div class="flex justify-center space-x-2">
+                                ${data.fotoStnk ? `<a href="${data.fotoStnk}" target="_blank" class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded hover:bg-blue-200">STNK</a>` : ''}
+                                ${data.fotoMotor ? `<a href="${data.fotoMotor}" target="_blank" class="inline-flex items-center px-2 py-1 bg-indigo-100 text-indigo-700 text-xs rounded hover:bg-indigo-200">MOTOR</a>` : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+    </script>
+</body>
+</html>
