@@ -114,6 +114,17 @@
                     </form>
                 </div>
 
+                <!-- Pesan Sudah Terupdate -->
+                <div id="already-updated-msg" class="hidden p-6 sm:p-8 bg-yellow-50 border-b border-yellow-100">
+                    <div class="flex items-start">
+                        <i data-lucide="alert-triangle" class="w-6 h-6 mr-3 text-yellow-600 flex-shrink-0 mt-0.5"></i>
+                        <div>
+                            <h3 class="font-bold text-yellow-800">Data Sudah Terupdate!</h3>
+                            <p class="text-sm text-yellow-700 mt-1">Kendaraan dengan nomor plat ini telah diperbarui sebelumnya. Silakan hubungi admin atau pihak dinas jika data tidak sesuai dan Anda ingin memperbarui data lagi.</p>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Found Vehicle Data Section -->
                 <div id="found-vehicle-section" class="hidden p-6 sm:p-8">
                     <div class="flex items-center mb-6">
@@ -446,7 +457,22 @@
             const btn = e.target.querySelector('button[type="submit"]');
             const errEl = document.getElementById('search-error');
             const foundEl = document.getElementById('found-vehicle-section');
+            const duplicateMsgEl = document.getElementById('already-updated-msg');
             
+            // Cek apakah plat sudah pernah diupdate di perangkat ini atau di sesi ini
+            let updatedPlates = JSON.parse(localStorage.getItem('updatedPlates') || '[]');
+            const isAlreadyUpdated = updatedPlates.includes(query) || submittedData.some(d => d.plat && d.plat.replace(/\s+/g, '').toUpperCase() === query);
+
+            if (isAlreadyUpdated) {
+                errEl.classList.add('hidden');
+                foundEl.classList.add('hidden');
+                duplicateMsgEl.classList.remove('hidden');
+                lucide.createIcons();
+                return;
+            } else {
+                duplicateMsgEl.classList.add('hidden');
+            }
+
             btn.innerText = "Mencari...";
             btn.disabled = true;
 
@@ -542,7 +568,16 @@
                     payload.tanggal = new Date().toLocaleDateString('id-ID');
                     payload.fotoStnk = base64Stnk;
                     payload.fotoMotor = base64Motor;
-                    submittedData.unshift(payload);
+                }
+
+                // Tambahkan ke state lokal dan localStorage
+                submittedData.unshift(payload);
+                
+                let updatedPlates = JSON.parse(localStorage.getItem('updatedPlates') || '[]');
+                const upperPlat = currentFoundVehicle.plat.replace(/\s+/g, '').toUpperCase();
+                if (!updatedPlates.includes(upperPlat)) {
+                    updatedPlates.push(upperPlat);
+                    localStorage.setItem('updatedPlates', JSON.stringify(updatedPlates));
                 }
                 
                 document.getElementById('found-vehicle-section').classList.add('hidden');
@@ -566,6 +601,8 @@
             document.getElementById('main-form-area').classList.remove('hidden');
             document.getElementById('search-error').classList.add('hidden');
             document.getElementById('found-vehicle-section').classList.add('hidden');
+            document.getElementById('already-updated-msg').classList.add('hidden');
+            document.getElementById('input-plat').value = '';
         }
 
         // --- LOGIKA LOGIN & DASHBOARD ---
