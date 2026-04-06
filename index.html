@@ -102,7 +102,7 @@
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <i data-lucide="search" class="h-5 w-5 text-gray-400"></i>
                                 </div>
-                                <input type="text" id="input-plat" required class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 uppercase transition-shadow" placeholder="Contoh: AB 1234 CD">
+                                <input type="text" id="input-plat" required class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 uppercase transition-shadow" placeholder="Contoh: DN 1234 XY">
                             </div>
                             <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-sm">
                                 Cari
@@ -179,7 +179,7 @@
                                 </div>
                                 <div class="md:col-span-2">
                                     <label class="block text-sm font-semibold text-gray-700 mb-1">Instansi / Sekolah <span class="text-red-500">*</span></label>
-                                    <input required type="text" id="f-sekolahSekarang" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="Contoh: SDN 2 Bantul">
+                                    <input required type="text" id="f-sekolahSekarang" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="Contoh: SDN 2 Banawa">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-1">Kecamatan <span class="text-red-500">*</span></label>
@@ -298,8 +298,12 @@
                         <p id="stat-validasi" class="text-3xl font-bold text-blue-600">0</p>
                     </div>
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 min-w-[150px]">
+                        <p class="text-sm font-medium text-gray-500">Total Kendaraan</p>
+                        <p id="stat-kendaraan" class="text-3xl font-bold text-gray-800">0</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 min-w-[150px]">
                         <p class="text-sm font-medium text-gray-500">Koneksi App Script</p>
-                        <p id="stat-kendaraan" class="text-lg font-bold text-green-600 mt-1">Aktif</p>
+                        <p id="stat-koneksi" class="text-lg font-bold text-green-600 mt-1">Aktif</p>
                     </div>
                 </div>
             </div>
@@ -352,12 +356,12 @@
         // PASTE URL WEB APP APPS SCRIPT ANDA DI SINI (Dalam tanda kutip)
         // Contoh: 'https://script.google.com/macros/s/AKfycb.../exec'
         // =================================================================
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzKAcbMcphegPP2CrTQuIbYCuKxP5kVb8FV_COUyVqSbSI2KKICJyMO2Me-HPVEbgPwOw/exec'; 
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzo6koboQHAtKL30T_kc4IXA9RFLHRXZzqgQbnOrl06jjmBLmKx_YfDqhMN4Esy691RbQ/exec'; 
 
         // --- DATA SIMULASI (Jika URL Script belum diatur) ---
         const INITIAL_MASTER_DATA = [
-            { plat: "AB 1234 CD", kendaraan: "Honda Supra X 125", pemegangLama: "Budi Santoso", rangka: "MH1JB912345678", mesin: "JB91E-1234567", bpkb: "B-12345678", sekolah: "SDN 1 Bantul", alamat: "Jl. Jenderal Sudirman No. 1" },
-            { plat: "AB 5678 EF", kendaraan: "Yamaha Jupiter Z", pemegangLama: "Siti Rahmawati", rangka: "MH25TP12345678", mesin: "5TP-1234567", bpkb: "B-87654321", sekolah: "SMPN 2 Sleman", alamat: "Jl. Magelang Km 10" }
+            { plat: "DN 1234 XY", kendaraan: "Honda Supra X 125", pemegangLama: "Budi Santoso", rangka: "MH1JB912345678", mesin: "JB91E-1234567", bpkb: "B-12345678", sekolah: "SDN 1 Banawa", alamat: "Jl. Jenderal Sudirman No. 1" },
+            { plat: "DN 5678 AB", kendaraan: "Yamaha Jupiter Z", pemegangLama: "Siti Rahmawati", rangka: "MH25TP12345678", mesin: "5TP-1234567", bpkb: "B-87654321", sekolah: "SMPN 2 Sirenja", alamat: "Jl. Poros Palu - Sabang" }
         ];
 
         let submittedData = [];
@@ -486,7 +490,7 @@
                 if (isAlreadyUpdated) {
                     errEl.classList.add('hidden');
                     foundEl.classList.add('hidden');
-                    duplicateMsgEl.classList.remove('hidden'); // Munculkan peringatan kuning
+                    duplicateMsgEl.classList.remove('hidden');
                     lucide.createIcons();
                 } 
                 // Jika data ditemukan dan BELUM DIUPDATE
@@ -578,8 +582,6 @@
                 // Tambahkan ke state lokal untuk update UI Dashboard
                 submittedData.unshift(payload);
                 
-                // --- Kode localStorage telah dihapus dari sini ---
-
                 document.getElementById('found-vehicle-section').classList.add('hidden');
                 document.getElementById('main-form-area').classList.add('hidden');
                 document.getElementById('submit-success').classList.remove('hidden');
@@ -636,19 +638,27 @@
             const tableEl = document.getElementById('table-dashboard');
             const tbody = document.getElementById('dashboard-tbody');
             const chartContainer = document.getElementById('dashboard-chart-container');
+            
+            let totalKendaraan = INITIAL_MASTER_DATA.length;
 
             if (SCRIPT_URL) {
                 emptyEl.innerHTML = "<p>Memuat data dari Google Sheets...</p>";
                 try {
                     const response = await fetch(`${SCRIPT_URL}?action=getUpdates`);
                     const json = await response.json();
-                    if(json.status === 'success') submittedData = json.data;
+                    if(json.status === 'success') {
+                        submittedData = json.data;
+                        if (json.totalKendaraan !== undefined) {
+                            totalKendaraan = json.totalKendaraan;
+                        }
+                    }
                 } catch(e) {
                     console.error("Gagal load data dashboard", e);
                 }
             }
 
             document.getElementById('stat-validasi').innerText = submittedData.length;
+            document.getElementById('stat-kendaraan').innerText = totalKendaraan;
 
             if (submittedData.length === 0) {
                 emptyEl.classList.remove('hidden');
@@ -664,7 +674,7 @@
                 tableEl.classList.remove('hidden');
                 chartContainer.classList.remove('hidden');
                 
-                // RENDER GRAFIK BATANG
+                // Render Grafik Batang
                 const kecamatanCounts = {};
                 submittedData.forEach(data => {
                     if(data.kecamatan) {
@@ -701,7 +711,7 @@
                     }
                 });
 
-                // RENDER TABEL
+                // Render Tabel
                 tbody.innerHTML = submittedData.map(data => `
                     <tr class="hover:bg-blue-50 transition-colors">
                         <td class="px-6 py-4 whitespace-nowrap">
