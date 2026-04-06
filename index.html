@@ -458,40 +458,42 @@
             const errEl = document.getElementById('search-error');
             const foundEl = document.getElementById('found-vehicle-section');
             const duplicateMsgEl = document.getElementById('already-updated-msg');
-            
-            // Cek apakah plat sudah pernah diupdate di perangkat ini atau di sesi ini
-            let updatedPlates = JSON.parse(localStorage.getItem('updatedPlates') || '[]');
-            const isAlreadyUpdated = updatedPlates.includes(query) || submittedData.some(d => d.plat && d.plat.replace(/\s+/g, '').toUpperCase() === query);
-
-            if (isAlreadyUpdated) {
-                errEl.classList.add('hidden');
-                foundEl.classList.add('hidden');
-                duplicateMsgEl.classList.remove('hidden');
-                lucide.createIcons();
-                return;
-            } else {
-                duplicateMsgEl.classList.add('hidden');
-            }
 
             btn.innerText = "Mencari...";
             btn.disabled = true;
 
             try {
                 let resultData = null;
+                let isAlreadyUpdated = false;
 
                 if (SCRIPT_URL) {
                     // Cari di Google Sheets API
                     const response = await fetch(`${SCRIPT_URL}?action=search&plat=${encodeURIComponent(query)}`);
                     const json = await response.json();
-                    if(json.status === 'success') resultData = json.data;
+                    
+                    if(json.status === 'success') {
+                        resultData = json.data;
+                        // Ambil indikator 'isUpdated' langsung dari database Google Sheet
+                        isAlreadyUpdated = json.isUpdated; 
+                    }
                 } else {
                     // Fallback ke Simulasi jika Script URL kosong
                     resultData = INITIAL_MASTER_DATA.find(v => v.plat.replace(/\s+/g, '').toUpperCase() === query);
+                    isAlreadyUpdated = submittedData.some(d => d.plat && d.plat.replace(/\s+/g, '').toUpperCase() === query);
                 }
 
-                if (resultData) {
+                // Jika data ditemukan dan TERNYATA SUDAH DIUPDATE SEBELUMNYA
+                if (isAlreadyUpdated) {
+                    errEl.classList.add('hidden');
+                    foundEl.classList.add('hidden');
+                    duplicateMsgEl.classList.remove('hidden'); // Munculkan peringatan kuning
+                    lucide.createIcons();
+                } 
+                // Jika data ditemukan dan BELUM DIUPDATE
+                else if (resultData) {
                     currentFoundVehicle = resultData;
                     errEl.classList.add('hidden');
+                    duplicateMsgEl.classList.add('hidden');
                     foundEl.classList.remove('hidden');
                     
                     document.getElementById('v-kendaraan').innerText = resultData.kendaraan;
@@ -505,8 +507,11 @@
                     document.getElementById('update-form').reset();
                     document.getElementById('name-fotoStnk').innerText = "Belum ada file terpilih";
                     document.getElementById('name-fotoMotor').innerText = "Belum ada file terpilih";
-                } else {
+                } 
+                // Jika data sama sekali tidak ditemukan
+                else {
                     currentFoundVehicle = null;
+                    duplicateMsgEl.classList.add('hidden');
                     errEl.classList.remove('hidden');
                     foundEl.classList.add('hidden');
                 }
@@ -570,16 +575,11 @@
                     payload.fotoMotor = base64Motor;
                 }
 
-                // Tambahkan ke state lokal dan localStorage
+                // Tambahkan ke state lokal untuk update UI Dashboard
                 submittedData.unshift(payload);
                 
-                let updatedPlates = JSON.parse(localStorage.getItem('updatedPlates') || '[]');
-                const upperPlat = currentFoundVehicle.plat.replace(/\s+/g, '').toUpperCase();
-                if (!updatedPlates.includes(upperPlat)) {
-                    updatedPlates.push(upperPlat);
-                    localStorage.setItem('updatedPlates', JSON.stringify(updatedPlates));
-                }
-                
+                // --- Kode localStorage telah dihapus dari sini ---
+
                 document.getElementById('found-vehicle-section').classList.add('hidden');
                 document.getElementById('main-form-area').classList.add('hidden');
                 document.getElementById('submit-success').classList.remove('hidden');
