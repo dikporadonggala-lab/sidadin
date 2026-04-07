@@ -18,9 +18,19 @@
             to { opacity: 1; transform: translateY(0); }
         }
         .hidden-view { display: none !important; }
+        
+        /* Pengaturan Khusus untuk Cetak Surat */
+        @media print {
+            body { background: white; }
+            /* Sembunyikan semua elemen UI utama saat mencetak */
+            nav, main { display: none !important; }
+            /* Tampilkan hanya area surat */
+            #print-area { display: block !important; position: static; width: 100%; margin: 0; padding: 0; color: black; }
+            @page { margin: 2cm; }
+        }
     </style>
 </head>
-<body class="bg-gray-50 font-sans text-gray-800 min-h-screen">
+<body class="bg-gray-50 font-sans text-gray-800 min-h-screen relative">
 
     <!-- NAVBAR -->
     <nav class="bg-blue-800 text-white shadow-md sticky top-0 z-50">
@@ -28,14 +38,17 @@
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
                     <!-- Ikon Motor SVG agar pasti muncul -->
-                    <svg class="h-8 w-8 mr-3 text-blue-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="m10 16-1-5"/>
-                        <path d="M12 13h4"/>
-                        <path d="M16 11V7a2 2 0 0 0-2-2h-3l-2 2H6a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h3"/>
-                        <circle cx="6" cy="16" r="3"/>
-                        <circle cx="18" cy="16" r="3"/>
-                        <path d="m18 13-2-5h-3"/>
-                    </svg>
+                    <div class="flex flex-col items-center justify-center mr-3 text-blue-300">
+                        <i data-lucide="car" class="h-5 w-5"></i>
+                        <svg class="h-5 w-5 -mt-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m10 16-1-5"/>
+                            <path d="M12 13h4"/>
+                            <path d="M16 11V7a2 2 0 0 0-2-2h-3l-2 2H6a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h3"/>
+                            <circle cx="6" cy="16" r="3"/>
+                            <circle cx="18" cy="16" r="3"/>
+                            <path d="m18 13-2-5h-3"/>
+                        </svg>
+                    </div>
                     <span class="font-bold text-xl tracking-tight">SIDADIN</span>
                     <span class="hidden sm:ml-2 sm:block text-sm text-blue-200 mt-1">Sistem Data Kendaraan Dinas</span>
                 </div>
@@ -183,7 +196,19 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div class="md:col-span-2">
                                     <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Pemegang Sekarang <span class="text-red-500">*</span></label>
-                                    <input required type="text" id="f-namaSekarang" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="Masukkan nama lengkap">
+                                    <input required type="text" id="f-namaSekarang" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="Masukkan nama lengkap beserta Gelar (Bila ada)">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-semibold text-gray-700 mb-1">NIP <span class="text-gray-400 font-normal">(Opsional)</span></label>
+                                    <input type="number" id="f-nip" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="Masukkan 18 Digit NIP">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Jabatan <span class="text-red-500">*</span></label>
+                                    <input required type="text" id="f-jabatan" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="Contoh: KEPALA SMPN SATAP 7">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-1">No. WhatsApp <span class="text-red-500">*</span></label>
+                                    <input required type="tel" id="f-nowa" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="Contoh: 081234567890">
                                 </div>
                                 <div class="md:col-span-2">
                                     <label class="block text-sm font-semibold text-gray-700 mb-1">Instansi / Sekolah <span class="text-red-500">*</span></label>
@@ -229,7 +254,7 @@
                                 </div>
 
                                 <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Unggah Foto Motor Bersama Pemegang Baru Tampak Depan <span class="text-red-500">*</span></label>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Unggah Foto Motor Tampak Depan <span class="text-red-500">*</span></label>
                                     <div class="flex items-center">
                                         <label class="flex items-center justify-center px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer">
                                             <i data-lucide="upload" class="w-4 h-4 mr-2"></i> Pilih Foto
@@ -342,8 +367,8 @@
                                 <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Tanggal & Plat</th>
                                 <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Kendaraan</th>
                                 <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Pemegang Lama -> Baru</th>
-                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Instansi Sekarang</th>
-                                <th scope="col" class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Berkas</th>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Kontak & Instansi</th>
+                                <th scope="col" class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="dashboard-tbody" class="bg-white divide-y divide-gray-200">
@@ -355,6 +380,86 @@
         </div>
     </main>
 
+    <!-- ============================================== -->
+    <!-- TEMPLATE SURAT PENUNJUKAN (HANYA MUNCUL SAAT DICETAK) -->
+    <!-- ============================================== -->
+    <div id="print-area" class="hidden bg-white text-black font-serif text-[12pt] p-8 mx-auto w-full max-w-4xl">
+        <!-- KOP SURAT (Halaman 1) -->
+        <div class="flex items-center mb-2 relative">
+            <img src="https://i.ibb.co.com/5xhN0cm1/Logo-Donggala.png" alt="Logo Donggala" class="w-20 h-auto absolute left-0 top-0">
+            <div class="text-center w-full">
+                <h2 class="text-xl font-bold uppercase leading-tight">PEMERINTAH KABUPATEN DONGGALA<br>DINAS PENDIDIKAN, PEMUDA DAN OLAHRAGA</h2>
+                <p class="text-[11pt]">Alamat: Jalan Jati Kel. Gunung Bale Kec. Banawa</p>
+            </div>
+        </div>
+        <hr class="border-t-[3px] border-black mt-2 mb-1">
+        <hr class="border-t border-black mb-6">
+        
+        <!-- JUDUL SURAT -->
+        <div class="text-center mb-6">
+            <h3 class="font-bold underline text-lg">SURAT PENUNJUKAN PEMEGANG KENDARAAN DINAS OPERASIONAL</h3>
+        </div>
+        
+        <p class="mb-4 text-justify">Kepala Dinas Pendidikan, Pemuda dan Olahraga dengan ini, menunjuk sebagai berikut:</p>
+        
+        <table class="w-full mb-4 ml-4">
+            <tr><td class="w-48 align-top py-1">Nama</td><td class="w-4 align-top py-1">:</td><td class="py-1"><span id="pr-nama" class="font-bold uppercase"></span></td></tr>
+            <tr><td class="w-48 align-top py-1">Nip</td><td class="w-4 align-top py-1">:</td><td class="py-1"><span id="pr-nip"></span></td></tr>
+            <tr><td class="w-48 align-top py-1">Jabatan</td><td class="w-4 align-top py-1">:</td><td class="py-1"><span id="pr-jabatan" class="uppercase"></span></td></tr>
+        </table>
+        
+        <p class="mb-4 text-justify">Untuk menggunakan dan bertanggung jawab atas kendaraan Dinas Operasional milik Pemerintah Daerah Kabupaten Donggala yang berada pada unit pengguna Dinas Pendidikan, Pemuda dan Olahraga, dengan spesifikasi sebagai berikut:</p>
+        
+        <table class="w-full mb-4 ml-4">
+            <tr><td class="w-48 align-top py-1">Merk</td><td class="w-4 align-top py-1">:</td><td class="py-1 uppercase"><span id="pr-merk"></span></td></tr>
+            <tr><td class="w-48 align-top py-1">Type</td><td class="w-4 align-top py-1">:</td><td class="py-1 uppercase"><span id="pr-type"></span></td></tr>
+            <tr><td class="w-48 align-top py-1">Nomor Polisi</td><td class="w-4 align-top py-1">:</td><td class="py-1 uppercase"><span id="pr-nopol"></span></td></tr>
+            <tr><td class="w-48 align-top py-1">Nomor Rangka</td><td class="w-4 align-top py-1">:</td><td class="py-1 uppercase"><span id="pr-rangka"></span></td></tr>
+            <tr><td class="w-48 align-top py-1">Nomor Mesin</td><td class="w-4 align-top py-1">:</td><td class="py-1 uppercase"><span id="pr-mesin"></span></td></tr>
+            <tr><td class="w-48 align-top py-1">Nomor BPKB</td><td class="w-4 align-top py-1">:</td><td class="py-1 uppercase"><span id="pr-bpkb"></span></td></tr>
+        </table>
+        
+        <p class="mb-2 text-justify">Penggunaan kendaraan Dinas Operasional tersebut sebagai berikut:</p>
+        
+        <ol class="list-[upper-roman] pl-8 mb-6 space-y-2 text-justify">
+            <li class="pl-2">Untuk mendukung/menunjang kelancaraan pelaksanan tugas pokok dan fungsi dilingkungan pemerintah Kabupaten Donggala pada dinas Pendidikan dan Kubudayaan;</li>
+            <li class="pl-2">Pemegang kendaraan Dinas bertanggung jawab akan:
+                <ol class="list-[lower-alpha] pl-6 mt-1 space-y-1">
+                    <li class="pl-1">Kelengkapan;</li>
+                    <li class="pl-1">Kondisi;</li>
+                    <li class="pl-1">Keamanan.</li>
+                </ol>
+            </li>
+            <li class="pl-2">Pemegang Kendaraan Dinas Operasional bertanggung jawab kepada sekretaris Daerah selaku pengelola barang dan/atau kepada kepala Dinas Pendidikan dan kebudayan;</li>
+            <li class="pl-2">Penyalagunaan pengunaan Kendaraan Dinas Operasional diluar kedinasan dan/atau untuk kepentingan pribadi dapat mengakibatkan dicabutnya atau ditariknya kendaraan Dinas Operasional tersebut dengan segala konsekuensinya;</li>
+            <li class="pl-2">Penunjukkan ini berlaku selama yang bersangkutan menduduki jabatan atau menjadi Pegawai Negeri Sipil pada Dinas Pendidikan dan Kebudayaan;</li>
+            <li class="pl-2">Yang bersangkutan berkewajiban untuk menyerahkan kembali Kendaraan Dinas apabila dimutas disatuan perangkat daerah lain dan/atau tidak menjadi Pegawai Negeri Sipil pada lingkungan Pemerintah Daerah Kabupaten Donggala;</li>
+            <li class="pl-2">Dengan alasan keperluan kedinasan dan/atau keperluan pemeriksaan oleh BPK RI kendaraan Dinas Operasional dapat ditarik setiap waktu.</li>
+        </ol>
+        
+        <p class="mb-10 text-justify">Demikian untuk dilaksanakan sebaik-baiknya dengan penuh rasa tanggung jawab.</p>
+        
+        <div class="flex justify-end text-center w-full mt-8">
+            <div class="w-72">
+                <p>Donggala, <span id="pr-tanggal"></span></p>
+                <p>An. Kepala Dinas Pendidikan dan Kebudayaan</p>
+                <p>Kabupaten Donggala</p>
+                <p class="mb-24">Kasub. Keuangan & Aset</p>
+                <p class="font-bold underline uppercase">NILAWATI, SE</p>
+                <p>Nip. 19751106200502 2 006</p>
+            </div>
+        </div>
+
+        <!-- HALAMAN 2: LAMPIRAN FOTO KENDARAAN -->
+        <!-- page-break-before akan memaksa bagian ini tercetak di halaman baru -->
+        <div id="print-photo-section" style="page-break-before: always; break-before: page;" class="pt-8">
+            <h3 class="font-bold text-lg mb-4 text-center underline uppercase">Lampiran Foto Kendaraan</h3>
+            <div class="flex justify-center mt-8">
+                <img id="pr-foto" src="" alt="Foto Kendaraan" class="max-w-[80%] h-auto border-[3px] border-gray-800 p-2 shadow-sm">
+            </div>
+        </div>
+    </div>
+
     <!-- KODE JAVASCRIPT LOGIKA APLIKASI -->
     <script>
         // Inisialisasi Icons Lucide
@@ -364,9 +469,9 @@
         // PASTE URL WEB APP APPS SCRIPT ANDA DI SINI (Dalam tanda kutip)
         // Contoh: 'https://script.google.com/macros/s/AKfycb.../exec'
         // =================================================================
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzo6koboQHAtKL30T_kc4IXA9RFLHRXZzqgQbnOrl06jjmBLmKx_YfDqhMN4Esy691RbQ/exec'; 
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw3CyNkkR9Dvg80_NO1MecTtPa3nJli3cjbmhOSWmgfzF60eEXKqBu12qJJshFEkMC3Sw/exec'; 
 
-        // --- DATA SIMULASI (Jika URL Script belum diatur) ---
+        // --- DATA SIMULASI ---
         const INITIAL_MASTER_DATA = [
             { plat: "DN 1234 XY", kendaraan: "Honda Supra X 125", pemegangLama: "Budi Santoso", rangka: "MH1JB912345678", mesin: "JB91E-1234567", bpkb: "B-12345678", sekolah: "SDN 1 Banawa", alamat: "Jl. Jenderal Sudirman No. 1" },
             { plat: "DN 5678 AB", kendaraan: "Yamaha Jupiter Z", pemegangLama: "Siti Rahmawati", rangka: "MH25TP12345678", mesin: "5TP-1234567", bpkb: "B-87654321", sekolah: "SMPN 2 Sirenja", alamat: "Jl. Poros Palu - Sabang" }
@@ -449,7 +554,6 @@
             lucide.createIcons();
         }
 
-        // --- BANTUAN KONVERSI GAMBAR ---
         function fileToBase64(file) {
             return new Promise((resolve, reject) => {
                 if(!file) resolve(null);
@@ -460,7 +564,7 @@
             });
         }
 
-        // --- LOGIKA FORM PENCARIAN & UPDATE ---
+        // --- LOGIKA PENCARIAN & UPDATE ---
         async function handleSearch(e) {
             e.preventDefault();
             const query = document.getElementById('input-plat').value.replace(/\s+/g, '').toUpperCase();
@@ -479,29 +583,24 @@
                 let isAlreadyUpdated = false;
 
                 if (SCRIPT_URL) {
-                    // Cari di Google Sheets API
                     const response = await fetch(`${SCRIPT_URL}?action=search&plat=${encodeURIComponent(query)}`);
                     const json = await response.json();
                     
                     if(json.status === 'success') {
                         resultData = json.data;
-                        // Ambil indikator 'isUpdated' langsung dari database Google Sheet
                         isAlreadyUpdated = json.isUpdated; 
                     }
                 } else {
-                    // Fallback ke Simulasi jika Script URL kosong
                     resultData = INITIAL_MASTER_DATA.find(v => v.plat.replace(/\s+/g, '').toUpperCase() === query);
                     isAlreadyUpdated = submittedData.some(d => d.plat && d.plat.replace(/\s+/g, '').toUpperCase() === query);
                 }
 
-                // Jika data ditemukan dan TERNYATA SUDAH DIUPDATE SEBELUMNYA
                 if (isAlreadyUpdated) {
                     errEl.classList.add('hidden');
                     foundEl.classList.add('hidden');
                     duplicateMsgEl.classList.remove('hidden');
                     lucide.createIcons();
                 } 
-                // Jika data ditemukan dan BELUM DIUPDATE
                 else if (resultData) {
                     currentFoundVehicle = resultData;
                     errEl.classList.add('hidden');
@@ -520,7 +619,6 @@
                     document.getElementById('name-fotoStnk').innerText = "Belum ada file terpilih";
                     document.getElementById('name-fotoMotor').innerText = "Belum ada file terpilih";
                 } 
-                // Jika data sama sekali tidak ditemukan
                 else {
                     currentFoundVehicle = null;
                     duplicateMsgEl.classList.add('hidden');
@@ -528,8 +626,7 @@
                     foundEl.classList.add('hidden');
                 }
             } catch (error) {
-                alert("Gagal terhubung ke database. Pastikan koneksi internet stabil atau SCRIPT_URL sudah benar.");
-                console.error(error);
+                alert("Gagal terhubung ke database. Pastikan koneksi internet stabil.");
             } finally {
                 btn.innerText = "Cari";
                 btn.disabled = false;
@@ -562,8 +659,12 @@
                 const base64Motor = await fileToBase64(fileMotor);
 
                 const payload = {
+                    id: Date.now().toString(), 
                     ...currentFoundVehicle,
                     namaSekarang: document.getElementById('f-namaSekarang').value,
+                    nip: document.getElementById('f-nip').value || "-", 
+                    jabatan: document.getElementById('f-jabatan').value, 
+                    nowa: document.getElementById('f-nowa').value,      
                     sekolahSekarang: document.getElementById('f-sekolahSekarang').value,
                     kecamatan: document.getElementById('f-kecamatan').value,
                     alamatSekarang: document.getElementById('f-alamatSekarang').value,
@@ -574,20 +675,17 @@
                 };
 
                 if (SCRIPT_URL) {
-                    // Simpan ke Google Sheets via POST
                     await fetch(SCRIPT_URL, {
                         method: 'POST',
                         body: JSON.stringify(payload)
                     });
                 } else {
-                    // Fallback Simulasi
                     await new Promise(r => setTimeout(r, 1000));
                     payload.tanggal = new Date().toLocaleDateString('id-ID');
                     payload.fotoStnk = base64Stnk;
                     payload.fotoMotor = base64Motor;
                 }
 
-                // Tambahkan ke state lokal untuk update UI Dashboard
                 submittedData.unshift(payload);
                 
                 document.getElementById('found-vehicle-section').classList.add('hidden');
@@ -597,7 +695,6 @@
 
             } catch (error) {
                 alert("Terjadi kesalahan saat mengunggah data.");
-                console.error(error);
             } finally {
                 btn.disabled = false;
                 btn.innerText = "Simpan Data Pembaruan";
@@ -655,13 +752,14 @@
                     const response = await fetch(`${SCRIPT_URL}?action=getUpdates`);
                     const json = await response.json();
                     if(json.status === 'success') {
-                        submittedData = json.data;
+                        // Tambahkan ID buatan agar tombol Cetak tetap jalan meski load dari sheet
+                        submittedData = json.data.map((d, index) => ({...d, id: 'sheet_id_'+index }));
                         if (json.totalKendaraan !== undefined) {
                             totalKendaraan = json.totalKendaraan;
                         }
                     }
                 } catch(e) {
-                    console.error("Gagal load data dashboard", e);
+                    console.error("Gagal load data dashboard");
                 }
             }
 
@@ -682,7 +780,7 @@
                 tableEl.classList.remove('hidden');
                 chartContainer.classList.remove('hidden');
                 
-                // Render Grafik Batang
+                // Grafik Batang
                 const kecamatanCounts = {};
                 submittedData.forEach(data => {
                     if(data.kecamatan) {
@@ -691,9 +789,7 @@
                 });
                 
                 const ctx = document.getElementById('chartKecamatan').getContext('2d');
-                if(chartInstance) {
-                    chartInstance.destroy();
-                }
+                if(chartInstance) chartInstance.destroy();
                 chartInstance = new Chart(ctx, {
                     type: 'bar',
                     data: {
@@ -707,24 +803,15 @@
                             borderRadius: 4
                         }]
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: { stepSize: 1 }
-                            }
-                        }
-                    }
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
                 });
 
-                // Render Tabel
+                // Tabel dengan Tombol Cetak
                 tbody.innerHTML = submittedData.map(data => `
                     <tr class="hover:bg-blue-50 transition-colors">
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-bold text-gray-900">${data.plat}</div>
-                            <div class="text-xs text-gray-500 mt-1">${data.tanggal}</div>
+                            <div class="text-xs text-gray-500 mt-1">${data.tanggal || '-'}</div>
                         </td>
                         <td class="px-6 py-4">
                             <div class="text-sm font-medium text-gray-900">${data.kendaraan}</div>
@@ -734,19 +821,140 @@
                             <div class="text-sm font-bold text-green-600 flex items-center">
                                 <span class="text-green-500 mr-1">↳</span> ${data.namaSekarang}
                             </div>
+                            <div class="text-xs text-gray-500 mt-1 uppercase">${data.jabatan || '-'}</div>
                         </td>
                         <td class="px-6 py-4">
                             <div class="text-sm font-medium text-gray-900">${data.sekolahSekarang}</div>
-                            <div class="text-xs text-gray-500 mt-1 truncate max-w-[200px]">${data.alamatSekarang}, Kec. ${data.kecamatan}</div>
+                            <div class="text-xs text-gray-500 mt-1 truncate max-w-[150px]">${data.alamatSekarang}, Kec. ${data.kecamatan}</div>
+                            <div class="text-xs font-mono text-blue-600 mt-1">WA: ${data.nowa || '-'}</div>
                         </td>
                         <td class="px-6 py-4 text-center whitespace-nowrap">
-                            <div class="flex justify-center space-x-2">
-                                ${data.fotoStnk ? `<a href="${data.fotoStnk}" target="_blank" class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded hover:bg-blue-200">STNK</a>` : ''}
-                                ${data.fotoMotor ? `<a href="${data.fotoMotor}" target="_blank" class="inline-flex items-center px-2 py-1 bg-indigo-100 text-indigo-700 text-xs rounded hover:bg-indigo-200">MOTOR</a>` : ''}
+                            <div class="flex flex-col space-y-2 items-center">
+                                <div class="flex space-x-2">
+                                    ${data.fotoStnk ? `<a href="${data.fotoStnk}" target="_blank" class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded hover:bg-blue-200">STNK</a>` : ''}
+                                    ${data.fotoMotor ? `<a href="${data.fotoMotor}" target="_blank" class="inline-flex items-center px-2 py-1 bg-indigo-100 text-indigo-700 text-xs rounded hover:bg-indigo-200">MOTOR</a>` : ''}
+                                </div>
+                                <button onclick="cetakSurat(event, '${data.id}')" class="w-full flex justify-center items-center px-3 py-1.5 border border-transparent text-xs font-bold rounded shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
+                                    <i data-lucide="printer" class="w-3 h-3 mr-1"></i> Cetak Surat
+                                </button>
                             </div>
                         </td>
                     </tr>
                 `).join('');
+                lucide.createIcons();
+            }
+        }
+
+        // --- BANTUAN KONVERSI LINK GOOGLE DRIVE ---
+        function getDirectImageUrl(url) {
+            if (!url) return '';
+            if (url.startsWith('data:image') || url.startsWith('blob:')) return url; 
+            
+            // Ubah link sharing standar Google Drive menjadi link Direct Image
+            const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+            if (match && match[1]) {
+                // Menggunakan endpoint lh3.googleusercontent.com yang lebih stabil & diizinkan untuk tag <img>
+                return `https://lh3.googleusercontent.com/d/${match[1]}`;
+            }
+            return url;
+        }
+
+        // --- FUNGSI CETAK SURAT PENUNJUKAN ---
+        async function cetakSurat(e, id) {
+            const btn = e.currentTarget;
+            const originalHtml = btn.innerHTML;
+            
+            // Ubah tombol jadi status loading sesaat jika data sedang diambil
+            btn.innerHTML = '<i data-lucide="loader" class="w-3 h-3 mr-1 animate-spin"></i> Menyiapkan...';
+            btn.disabled = true;
+            lucide.createIcons();
+
+            const data = submittedData.find(d => d.id === id);
+            if (!data) {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+                return;
+            }
+
+            let rangka = data.rangka || "-";
+            let mesin = data.mesin || "-";
+            let bpkb = data.bpkb || "-";
+
+            // Jika variabel Rangka, Mesin, dan BPKB bernilai kosong dari Dashboard
+            // Sistem akan otomatis menariknya langsung dari Data Master Sheet!
+            if ((rangka === "-" || rangka === "") && SCRIPT_URL) {
+                try {
+                    const response = await fetch(`${SCRIPT_URL}?action=search&plat=${encodeURIComponent(data.plat)}`);
+                    const json = await response.json();
+                    if(json.status === 'success') {
+                        rangka = json.data.rangka || "-";
+                        mesin = json.data.mesin || "-";
+                        bpkb = json.data.bpkb || "-";
+                        
+                        // Simpan kembali ke memory agar print selanjutnya lebih cepat
+                        data.rangka = rangka;
+                        data.mesin = mesin;
+                        data.bpkb = bpkb;
+                    }
+                } catch(err) {
+                    console.error("Gagal menarik detail kendaraan (Rangka/Mesin) dari database", err);
+                }
+            }
+
+            // Memisahkan Merk dan Type dari nama kendaraan (Kata pertama = Merk)
+            const splitKendaraan = data.kendaraan.split(' ');
+            const merk = splitKendaraan[0];
+            const type = splitKendaraan.slice(1).join(' ');
+
+            // Generate Tanggal Hari Ini versi Indonesia
+            const bulanIndo = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            const tgl = new Date();
+            const formatTanggal = `${tgl.getDate()} ${bulanIndo[tgl.getMonth()]} ${tgl.getFullYear()}`;
+
+            // Isi Elemen Print dengan Data
+            document.getElementById('pr-nama').innerText = data.namaSekarang || "-";
+            document.getElementById('pr-nip').innerText = data.nip && data.nip !== "-" ? data.nip : "-";
+            document.getElementById('pr-jabatan').innerText = data.jabatan || "-";
+            document.getElementById('pr-merk').innerText = merk || "-";
+            document.getElementById('pr-type').innerText = type || "-";
+            document.getElementById('pr-nopol').innerText = data.plat || "-";
+            document.getElementById('pr-rangka').innerText = rangka;
+            document.getElementById('pr-mesin').innerText = mesin;
+            document.getElementById('pr-bpkb').innerText = bpkb;
+            document.getElementById('pr-tanggal').innerText = formatTanggal;
+
+            // Atur Visibilitas Lampiran Foto di Halaman 2
+            const fotoEl = document.getElementById('pr-foto');
+            const photoSection = document.getElementById('print-photo-section');
+            
+            if (data.fotoMotor) {
+                // 1. Ubah ke Direct Link agar bisa di-render oleh <img> tag
+                fotoEl.src = getDirectImageUrl(data.fotoMotor);
+                photoSection.style.display = 'block';
+
+                // 2. Tunggu gambar benar-benar termuat di browser sebelum memunculkan popup Print
+                fotoEl.onload = () => {
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                    lucide.createIcons();
+                    window.print();
+                };
+                // Jika gambar gagal dimuat (misal kendala jaringan), tetap bisa diprint
+                fotoEl.onerror = () => {
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                    lucide.createIcons();
+                    window.print();
+                };
+            } else {
+                fotoEl.src = '';
+                photoSection.style.display = 'none';
+
+                // Kembalikan tombol seperti semula dan Trigger dialog print
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+                lucide.createIcons();
+                window.print();
             }
         }
     </script>
